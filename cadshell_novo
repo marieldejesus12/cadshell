@@ -1,0 +1,8 @@
+#!/bin/bash
+
+source lib/menu
+
+dialog --backtitle "$BACKTITLE" --infobox "Bem vindo ao CadShell..." 3 30 && sleep 2
+source lib/login
+
+menu_cadshell

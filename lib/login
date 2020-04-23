@@ -1,0 +1,50 @@
+#
+#Inicio do Código de Tela de Login e Autencicação de Usuário
+#
+
+while : ; do
+	MODULO="Login"
+	USUARIO="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Nome de Usuário:" 0 0`"
+	if [[ $? = "0" ]]; then
+		SENHA="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --passwordbox "Senha:" 0 0`"
+		if [[ $? = "0" ]]; then
+			if [[ $USUARIO = "postgres" ]]; then
+				dialog --backtitle "$BACKTITLE" --infobox "Inciando com privilégios administrativos..." 3 50 && sleep 2
+				rm -f ~/.pgpass
+				echo "$SERVIDOR:$PORTA:*:$USUARIO:$SENHA" > ~/.pgpass
+				chmod 600 ~/.pgpass
+				SQL="psql -U $USUARIO -d $DBASE -h $SERVIDOR -c"
+				break
+			else
+				rm -f ~/.pgpass
+				echo "$SERVIDOR:$PORTA:*:$USUARIO:$SENHA" > ~/.pgpass
+				chmod 600 ~/.pgpass
+				dialog --backtitle "$BACKTITLE" --infobox "Autenticando usuário." 3 30 && sleep 1
+				dialog --backtitle "$BACKTITLE" --infobox "Autenticando usuário.." 3 30 && sleep 1
+				dialog --backtitle "$BACKTITLE" --infobox "Autenticando usuário..." 3 30 && sleep 1
+				if [[ `psql -U $USUARIO -h $SERVIDOR -d $DBASE -l` ]]; then
+					dialog --backtitle "$BACKTITLE" --infobox "Usuário autenticado..." 3 28 && sleep 2
+					SQL="psql -U $USUARIO -d $DBASE -h $SERVIDOR -c"
+					break
+				else
+						dialog --backtitle "$BACKTITLE" --infobox "ERRO: Falha na autenticação.\n\nContate suporte." 0 0 && sleep 3
+				fi
+			fi
+		else
+			dialog --backtitle "$BACKTITLE" --infobox "Cancelando." 3 17 && sleep 1
+			dialog --backtitle "$BACKTITLE" --infobox "Cancelando.." 3 17 && sleep 1
+			dialog --backtitle "$BACKTITLE" --infobox "Cancelando..." 3 17 && sleep 1
+			rm -f ~/.pgpass
+			exit 0
+		fi
+	else
+		dialog --backtitle "$BACKTITLE" --infobox "Cancelando." 3 17 && sleep 1
+		dialog --backtitle "$BACKTITLE" --infobox "Cancelando.." 3 17 && sleep 1
+		dialog --backtitle "$BACKTITLE" --infobox "Cancelando..." 3 17 && sleep 1
+		rm -f ~/.pgpass
+		exit 0
+	fi
+done
+#
+#Fim do Código de Tela de Login e Autencicação de Usuário
+#

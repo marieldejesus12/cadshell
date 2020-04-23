@@ -1,0 +1,21 @@
+configuracao ()
+{
+	MODULO="Configuração do sistema"
+
+	mkdir -p ~/.cadshell
+	CONFEMPRESA="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Digite o nome da empresa:" 0 0`"
+	echo "$CONFEMPRESA" > ~/.cadshell/empresa
+	CONFDBASE="`echo $CONFEMPRESA | sed y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/ | sed y/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/aaaaaaeeeeiiiiooooouuuucn/`"
+	CONFDBASE="`echo $CONFEMPRESA | sed y/ /_/`"
+	CONFDBASE="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Digite o nome da base de dados:" 0 0 $CONFDBASE`"
+	echo "$CONFDBASE" > ~/.cadshell/dbase
+	CONFTABELA="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Digite o nome da tabela físico na base de dados:" 0 0 'cadshell_fisico'`"
+	echo "$CONFTABELA" > ~/.cadshell/tabela_fisico
+	CONFTABELA="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Digite o nome da tabela jurídico na base de dados:" 0 0 'cadshell_juridico'`"
+	echo "$CONFTABELA" > ~/.cadshell/tabela_juridico
+	CONFSERVIDOR="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Digite o endereço do servidor da base de dados:" 0 0 'localhost'`"
+	echo "$CONFSERVIDOR" > ~/.cadshell/servidor
+	CONFPORTA="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Digite a porta no servidor da base de dados:" 0 0 '5432'`"
+	echo "$CONFPORTA" > ~/.cadshell/porta
+	menu_cadshell
+}

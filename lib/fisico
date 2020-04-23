@@ -1,0 +1,958 @@
+#
+#Inicio do Código do CadShell Físico
+#
+cadshell_fisico ()
+{
+	TABELA="`cat ~/.cadshell/tabela_fisico`"
+
+	#
+	#Inicio do Código de inclusão de cadastro
+	#
+	adiciona_fisico ()
+	{
+		MODULO="Adicionar Cadastro Físico"
+		
+		while : ; do
+			NOME="`dialog --backtitle "$BACKTITLE" --stdout --max-input 100 --inputbox "Insira o nome abaixo:" 0 0`"
+			if [[ $? = "0" ]]; then
+				NOME="`echo $NOME | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+				if [[ "$NOME" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --msgbox "ERRO: Não é possível cadastrar sem um nome." 0 0
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		while : ; do
+			RG="`dialog --backtitle "$BACKTITLE" --stdout --max-input 30 --inputbox "Insira o RG abaixo:" 0 0`"
+			if [[ $? = "0" ]]; then
+				RG=`echo $RG | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`
+				if [[ "$RG" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem RG?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		INIT=""
+		while : ; do
+			CPF="`dialog --backtitle "$BACKTITLE" --stdout --max-input 11 --inputbox "Insira o CPF abaixo:\n(Sem pontos e traço)" 0 0 \"$INIT\"`"
+			if [[ $? = "0" ]]; then
+				INIT=$CPF
+				CARAC=`echo $CPF | wc -c`
+				SELECT="SELECT * FROM $TABELA WHERE cpf= '$CPF'"
+				if [[ "$CPF" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem CPF?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				elif [[ "`$SQL "$SELECT" | grep '$CPF' | cut -d"|" -f4`" = " $CPF " ]]; then
+					dialog --backtitle "$BACKTITLE" --msgbox "ERRO: CPF já está cadastrado." 0 0
+				elif [[ $CARAC -lt "12" ]]; then
+					dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O CPF tem que ter 11 digitos." 0 0
+				else
+					VERIFICA="`funcoeszz cpf $CPF`"
+					if [[ "$VERIFICA" = "valido" ]]; then
+						break
+					else
+						dialog --backtitle "$BACKTITLE" --msgbox "$VERIFICA" 0 0
+					fi
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		while : ; do
+			ENDERECO="`dialog --backtitle "$BACKTITLE" --stdout --max-input 60 --inputbox "Insira o endereço abaixo:" 0 0`"
+			if [[ $? = "0" ]]; then
+				ENDERECO="`echo $ENDERECO | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+				if [[ "$ENDERECO" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem endereço?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		while : ; do
+			BAIRRO="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Insira o bairro abaixo:" 0 0`"
+			if [[ $? = "0" ]]; then
+				BAIRRO="`echo $BAIRRO | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+				if [[ "$BAIRRO" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem bairro?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		while : ; do
+			CIDADE="`dialog --backtitle "$BACKTITLE" --stdout --max-input 40 --inputbox "Insira a cidade abaixo:" 0 0`"
+			if [[ $? = "0" ]]; then
+				CIDADE="`echo $CIDADE | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+				if [[ "$CIDADE" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem cidade?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		while : ; do
+			ESTADO="`dialog --backtitle "$BACKTITLE" --stdout --max-input 2 --inputbox "Insira a sigla do estado abaixo:" 0 0`"
+			if [[ $? = "0" ]]; then
+				ESTADO="`echo $ESTADO | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+				if [[ "$ESTADO" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem estado?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		INIT=""
+		while : ; do
+			CEP="`dialog --backtitle "$BACKTITLE" --stdout --max-input 8 --inputbox "Insira o CEP abaixo:" 0 0 \"$INIT\"`"
+			if [[ $? = "0" ]]; then
+				INIT=$CEP
+				CARAC=`echo $CEP | wc -c`
+				if [[ "$CEP" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem CEP?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				elif [[ $CARAC -lt "9" ]]; then
+					dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O CEP tem que ter 8 digitos." 0 0
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		INIT=""
+		while : ; do
+			FIXO="`dialog --backtitle "$BACKTITLE" --stdout --max-input 10 --inputbox "Insira o telefone fixo abaixo:" 0 0 \"$INIT\"`"
+			if [[ $? = "0" ]]; then
+				INIT=$FIXO
+				CARAC=`echo $FIXO | wc -c`
+				if [[ "$FIXO" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem telefone fixo?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				elif [[ $CARAC -lt "11" ]]; then
+					dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O telefone fixo tem que ter 10 digitos." 0 0
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		INIT=""
+		while : ; do
+			CELULAR="`dialog --backtitle "$BACKTITLE" --stdout --max-input 10 --inputbox "Insira o telefone celular abaixo:" 0 0 \"$INIT\"`"
+			if [[ $? = "0" ]]; then
+				INIT=$CELULAR
+				CARAC=`echo $CELULAR | wc -c`
+				if [[ "$CELULAR" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem telefone celular?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				elif [[ $CARAC -lt "11" ]]; then
+					dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O telefone celular tem que ter 10 digitos." 0 0
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		INIT=""
+		while : ; do
+			FAX="`dialog --backtitle "$BACKTITLE" --stdout --max-input 10 --inputbox "Insira o telefone fax abaixo:" 0 0 \"$INIT\"`"
+			if [[ $? = "0" ]]; then
+				INIT=$FAX
+				CARAC=`echo $FAX | wc -c`
+				if [[ "$FAX" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem telefone fax?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				elif [[ $CARAC -lt "11" ]]; then
+					dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O telefone fax tem que ter 10 digitos." 0 0
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		while : ; do
+			EMAIL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 30 --inputbox "Insira o e-mail abaixo:" 0 0`"
+			if [[ $? = "0" ]]; then
+				EMAIL="`echo $EMAIL | sed y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/ | sed y/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/àáâãäåèéêëìíîïòóôõöùúûüçñ/`"
+				if [[ "$EMAIL" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem e-mail?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		while : ; do
+			OBS="`dialog --backtitle "$BACKTITLE" --stdout --max-input 200 --inputbox "Insira observações abaixo:" 0 0 \"$OBSINI\"`"
+			if [[ $? = "0" ]]; then
+				OBS="`echo $OBS | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+				if [[ "$OBS" = "" ]]; then
+					dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem Observações?" 0 0
+					if [[ $? = "0" ]]; then
+						break
+					fi
+				else
+					break
+				fi
+			else
+				menu_fisico
+			fi
+		done
+
+		USER_CADASTRO="`echo $USUARIO | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+
+		dialog --backtitle "$BACKTITLE" --msgbox "Informações do Cadastro:\n\nNome: $NOME\nRG: $RG\nCPF: $CPF\nEndereço: $ENDERECO\nBairro: $BAIRRO\nCidade: $CIDADE\nEstado: $ESTADO\nCEP: $CEP\nTelefone Fixo: $FIXO\nTelefone Celular: $CELULAR\nTelefone Fax: $FAX\nE-mail: $EMAIL\nOBS.: $OBS" 0 0 --and-widget --defaultno --yesno 'Adicionar cadastro?' 0 0
+
+		if [[ "$?" = "0" ]]; then
+			VALORES="'$NOME', '$RG', '$CPF', '$ENDERECO', '$BAIRRO', '$CIDADE', '$ESTADO', '$CEP', '$FIXO', '$CELULAR', '$FAX', '$EMAIL', '$OBS', '$USER_CADASTRO'"
+			CAMPOS="nome, rg, cpf, endereco, bairro, cidade, estado, cep, fixo, celular, fax, email, obs, user_cadastro"
+			INSERT="INSERT INTO $TABELA ($CAMPOS) VALUES ($VALORES);"
+			$SQL "$INSERT" && dialog --backtitle "$BACKTITLE" --msgbox "Cadastro adicionado\ncom sucesso!" 0 0 || dialog --backtitle "$BACKTITLE" --msgbox "ERRO ao cadastrar\nTente novamente." 0 0
+		else
+			dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+		fi
+		
+		menu_fisico
+	}
+	#
+	#Final do Código de inclusão de cadastro
+	#
+
+	#
+	#Inicio do código de alteração de cadastro
+	#
+	altera_fisico ()
+	{
+		MODULO="Alterar Cadastro Físico"
+		
+		#
+		#Inicio da função para coleta de novos dados após escolha do cadastro a ser alterado
+		#
+		altera_dados ()
+		{
+			while : ; do
+				INIT="`echo $NOME`"
+				NOME_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 100 --inputbox "Insira o nome abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					NOME_ATUAL="`echo $NOME_ATUAL | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+					if [[ "$NOME_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --msgbox "ERRO: Não é possível cadastrar sem um nome." 0 0
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			
+			while : ; do
+				INIT="`echo $RG`"
+				RG_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 30 --inputbox "Insira o RG abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					RG_ATUAL=`echo $RG_ATUAL | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`
+					if [[ "$RG_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem RG?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			while : ; do
+				INIT="`echo $CPF`"
+				CPF_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 11 --inputbox "Insira o CPF abaixo:\n(Sem pontos e traço)" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					CARAC=`echo $CPF_ATUAL | wc -c`
+					if [[ "$CPF_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem CPF?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					elif [[ $CARAC -lt "12" ]]; then
+						dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O CPF tem que ter 11 digitos." 0 0
+					else
+						VERIFICA="`. funcoeszz cpf $CPF_ATUAL`"
+						if [[ $VERIFICA = "valido" ]]; then
+							break
+						else
+							dialog --backtitle "$BACKTITLE" --msgbox "$VERIFICA" 0 0
+						fi
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			while : ; do
+				INIT="$ENDERECO"
+				ENDERECO_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 60 --inputbox "Insira o endereço abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					ENDERECO_ATUAL="`echo $ENDERECO_ATUAL | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+					if [[ "$ENDERECO_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem endereço?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			while : ; do
+				INIT="$BAIRRO"
+				BAIRRO_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Insira o bairro abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					BAIRRO_ATUAL="`echo $BAIRRO_ATUAL | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+					if [[ "$BAIRRO_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem bairro?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			while : ; do
+				INIT="$CIDADE"
+				CIDADE_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 40 --inputbox "Insira a cidade abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					CIDADE_ATUAL="`echo $CIDADE_ATUAL | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+					if [[ "$CIDADE_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem cidade?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			while : ; do
+				INIT="$ESTADO"
+				ESTADO_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 2 --inputbox "Insira a sigla do estado abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					ESTADO_ATUAL="`echo $ESTADO_ATUAL | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+					if [[ "$ESTADO_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem estado?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+			
+			while : ; do
+				INIT="$CEP"
+				CEP_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 8 --inputbox "Insira o CEP abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					CARAC=`echo $CEP_ATUAL | wc -c`
+					if [[ "$CEP_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem CEP?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					elif [[ $CARAC -lt "9" ]]; then
+						dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O CEP tem que ter 8 digitos." 0 0
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			while : ; do
+				INIT="$FIXO"
+				FIXO_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 10 --inputbox "Insira o telefone fixo abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					CARAC=`echo $FIXO_ATUAL | wc -c`
+					if [[ "$FIXO_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem telefone fixo?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					elif [[ $CARAC -lt "11" ]]; then
+						dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O telefone fixo tem que ter 10 digitos." 0 0
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+
+			while : ; do
+				INIT="$CELULAR"
+				CELULAR_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 10 --inputbox "Insira o telefone celular abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					CARAC=`echo $CELULAR_ATUAL | wc -c`
+					if [[ "$CELULAR_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem telefone celular?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					elif [[ $CARAC -lt "11" ]]; then
+						dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O telefone celular tem que ter 10 digitos." 0 0
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+
+			while : ; do
+				INIT="$FAX"
+				FAX_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 10 --inputbox "Insira o telefone fax abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					CARAC=`echo $FAX_ATUAL | wc -c`
+					if [[ "$FAX_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem telefone fax?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					elif [[ $CARAC -lt "11" ]]; then
+						dialog --backtitle "$BACKTITLE" --msgbox "ERRO: O telefone fax tem que ter 10 digitos." 0 0
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			while : ; do
+				INIT="$EMAIL"
+				EMAIL_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 30 --inputbox "Insira o e-mail abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					EMAIL_ATUAL="`echo $EMAIL_ATUAL | sed y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/ | sed y/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/àáâãäåèéêëìíîïòóôõöùúûüçñ/`"
+					if [[ "$EMAIL_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem e-mail?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+		
+			while : ; do
+				INIT="$OBS"
+				OBS_ATUAL="`dialog --backtitle "$BACKTITLE" --stdout --max-input 200 --inputbox "Insira observações abaixo:" 0 0 \"$INIT\"`"
+				if [[ $? = "0" ]]; then
+					OBS_ATUAL="`echo $OBS_ATUAL | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+					if [[ "$OBS_ATUAL" = "" ]]; then
+						dialog --backtitle "$BACKTITLE" --defaultno --yesno "Cadastrar sem Observações?" 0 0
+						if [[ $? = "0" ]]; then
+							break
+						fi
+					else
+						break
+					fi
+				else
+					menu_fisico
+				fi
+			done
+
+			USER_CADASTRO="`echo $USUARIO | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+		
+			dialog --backtitle "$BACKTITLE" --msgbox "Novos dados do Cadastro:\n\nNome: $NOME_ATUAL\nRG: $RG_ATUAL\nCPF: $CPF_ATUAL\nEndereço: $ENDERECO_ATUAL\nBairro: $BAIRRO_ATUAL\nCidade: $CIDADE_ATUAL\nEstado: $ESTADO_ATUAL\nCEP: $CEP_ATUAL\nTelefone Fixo: $FIXO_ATUAL\nTelefone Celular: $CELULAR_ATUAL\nTelefone Fax: $FAX_ATUAL\nE-mail: $EMAIL_ATUAL\nOBS.: $OBS_ATUAL" 0 0 --and-widget --defaultno --yesno 'Alterar cadastro?' 0 0
+		
+			if [[ "$?" = "0" ]]; then
+				UPDATE1="UPDATE $TABELA SET nome= '$NOME_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE2="UPDATE $TABELA SET rg= '$RG_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE3="UPDATE $TABELA SET cpf= '$CPF_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE4="UPDATE $TABELA SET endereco= '$ENDERECO_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE5="UPDATE $TABELA SET bairro= '$BAIRRO_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE6="UPDATE $TABELA SET cidade= '$CIDADE_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE7="UPDATE $TABELA SET estado= '$ESTADO_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE8="UPDATE $TABELA SET cep= '$CEP_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE9="UPDATE $TABELA SET fixo= '$FIXO_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE10="UPDATE $TABELA SET celular= '$CELULAR_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE11="UPDATE $TABELA SET fax= '$FAX_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE12="UPDATE $TABELA SET email= '$EMAIL_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE13="UPDATE $TABELA SET obs= '$OBS_ATUAL' WHERE codigo= '`echo $CODIGO`';"
+				UPDATE14="UPDATE $TABELA SET user_cadastro= '$USER_CADASTRO' WHERE codigo= '`echo $CODIGO`';"
+				$SQL "$UPDATE1" && $SQL "$UPDATE2" && $SQL "$UPDATE3" && $SQL "$UPDATE4" && $SQL "$UPDATE5" && $SQL "$UPDATE6" && $SQL "$UPDATE7" && $SQL "$UPDATE8" && $SQL "$UPDATE9" && $SQL "$UPDATE10" && $SQL "$UPDATE11" && $SQL "$UPDATE12" && $SQL "$UPDATE13" && $SQL "$UPDATE14" && dialog --backtitle "$BACKTITLE" --msgbox "Cadastro atualizado\ncom sucesso!" 0 0 || dialog --backtitle "$BACKTITLE" --msgbox "ERRO ao atualizar\nNem todos os dados foram atualizados.\nTente novamente." 0 0
+			else
+				dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+			fi
+		}
+		#
+		#Final da função para coleta de novos dados após escolha do cadastro a ser alterado
+		#
+
+		#
+		#Inicio do Código de escolha do cadastro a ser alterado
+		#
+		rm -f $TEMP
+		FILTRA="`dialog --backtitle "$BACKTITLE" --stdout --inputbox "Digite um nome para alterar:" 0 0`"
+		
+		if [[ $? = "0" ]]; then
+			if [[ $FILTRA = "" ]]; then
+				dialog --backtitle "$BACKTITLE" --msgbox "ERRO: Campo de pesquisa vazio." 0 0
+				altera_fisico
+			fi
+			FILTRA="`echo $FILTRA | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+			BUSCA="'%$FILTRA%'"
+			SELECT="SELECT * FROM $TABELA WHERE nome LIKE $BUSCA"
+			$SQL "$SELECT" | grep "$FILTRA" | cut -c-7 > $TEMP
+			NUM=`cat $TEMP | wc -l`
+			if [[ $NUM -ge "2" ]]; then
+				rm -f $RUN
+				echo > $RUN
+				echo "ALTERA=\"\`dialog --backtitle '$BACKTITLE' --stdout --radiolist 'Selecione um contato para alterar.' 0 0 0 \\" >> $RUN
+				for i in `$SQL "$SELECT" | grep "$FILTRA" | cut -c-7 | sort -n`; do
+					SELECT="SELECT * FROM $TABELA WHERE codigo= '$i'"
+					NOME="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f2`"
+					echo "$i '`echo $NOME`' off \\" >> $RUN
+				done
+				echo "\`\"" >> $RUN
+				. $RUN
+				if [[ $? != "0" ]]; then
+					menu_fisico
+				fi
+				SELECT="SELECT * FROM $TABELA WHERE codigo= '$ALTERA'"
+				NOME_ALTERA="`$SQL "$SELECT" | grep -w $ALTERA | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f2 | cut -c2-`"
+				CARAC=`echo $NOME_ALTERA | wc -c`
+				CUT=`expr $CARAC - 1`
+				NOME_ALTERA="`echo $NOME_ALTERA | cut -c-$CUT`"
+				SELECT="SELECT * FROM $TABELA WHERE nome= '$NOME_ALTERA'"
+
+
+				CODIGO="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f1`"
+				NOME="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f2`"
+				RG="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f3`"
+				CPF="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f4`"
+
+				ENDERECO="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f5 | cut -c2-`"
+				CARAC=`echo $ENDERECO | wc -c`
+				CUT=`expr $CARAC - 1`
+				ENDERECO=`echo $ENDERECO | cut -c-$CUT`
+
+				BAIRRO="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f6 | cut -c2-`"
+				CARAC=`echo $BAIRRO | wc -c`
+				CUT=`expr $CARAC - 1`
+				BAIRRO=`echo $BAIRRO | cut -c-$CUT`
+
+				CIDADE="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f7 | cut -c2-`"
+				CARAC=`echo $CIDADE | wc -c`
+				CUT=`expr $CARAC - 1`
+				CIDADE=`echo $CIDADE | cut -c-$CUT`
+
+				ESTADO="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f8 | cut -c2-`"
+				CARAC=`echo $ESTADO | wc -c`
+				CUT=`expr $CARAC - 1`
+				ESTADO=`echo $ESTADO | cut -c-$CUT`
+
+				CEP="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f9 | cut -c2-`"
+				CARAC=`echo $CEP | wc -c`
+				CUT=`expr $CARAC - 1`
+				CEP=`echo $CEP | cut -c-$CUT`
+
+				FIXO="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f10 | cut -c2-`"
+				CARAC=`echo $FIXO | wc -c`
+				CUT=`expr $CARAC - 1`
+				FIXO=`echo $FIXO | cut -c-$CUT`
+
+				CELULAR="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f11 | cut -c2-`"
+				CARAC=`echo $CELULAR | wc -c`
+				CUT=`expr $CARAC - 1`
+				CELULAR=`echo $CELULAR | cut -c-$CUT`
+
+				FAX="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f12 | cut -c2-`"
+				CARAC=`echo $FAX | wc -c`
+				CUT=`expr $CARAC - 1`
+				FAX=`echo $FAX | cut -c-$CUT`
+
+				EMAIL="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f13 | cut -c2-`"
+				CARAC=`echo $EMAIL | wc -c`
+				CUT=`expr $CARAC - 1`
+				EMAIL=`echo $EMAIL | cut -c-$CUT`
+				
+				OBS="`$SQL "$SELECT" | grep -w "$NOME_ALTERA" | cut -d"|" -f14 | cut -c2-`"
+				CARAC=`echo $OBS | wc -c`
+				CUT=`expr $CARAC - 1`
+				OBS=`echo $OBS | cut -c-$CUT`
+		
+				dialog --backtitle "$BACKTITLE" --msgbox "Informações do Cadastro:\n\nCódigo de Cadastro: `echo $CODIGO`\nNome: `echo $NOME`\nRG: `echo $RG`\nCPF: `echo $CPF`\nEndereço: `echo $ENDERECO`\nBairro: `echo $BAIRRO`\nCidade: `echo $CIDADE`\nEstado: `echo $ESTADO`\nCEP: `echo $CEP`\nTelefone Fixo: `echo $FIXO`\nTelefone Celular: `echo $CELULAR`\nFax: `echo $FAX`\nE-mail: `echo $EMAIL`\nOBS.: `echo $OBS`" 0 0 --and-widget --defaultno --yesno 'Alterar cadastro?' 0 0
+		 		if [[ "$?" = "0" ]]; then
+					altera_dados
+				else
+					dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+				fi
+			else
+				CODIGO="`$SQL "$SELECT" | grep "$FILTRA" | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f1`"
+				NOME="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f2`"
+				RG="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f3`"
+				CPF="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f4`"
+
+				ENDERECO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f5 | cut -c2-`"
+				CARAC=`echo $ENDERECO | wc -c`
+				CUT=`expr $CARAC - 1`
+				ENDERECO=`echo $ENDERECO | cut -c-$CUT`
+
+				BAIRRO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f6 | cut -c2-`"
+				CARAC=`echo $BAIRRO | wc -c`
+				CUT=`expr $CARAC - 1`
+				BAIRRO=`echo $BAIRRO | cut -c-$CUT`
+
+				CIDADE="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f7 | cut -c2-`"
+				CARAC=`echo $CIDADE | wc -c`
+				CUT=`expr $CARAC - 1`
+				CIDADE=`echo $CIDADE | cut -c-$CUT`
+
+				ESTADO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f8 | cut -c2-`"
+				CARAC=`echo $ESTADO | wc -c`
+				CUT=`expr $CARAC - 1`
+				ESTADO=`echo $ESTADO | cut -c-$CUT`
+
+				CEP="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f9 | cut -c2-`"
+				CARAC=`echo $CEP | wc -c`
+				CUT=`expr $CARAC - 1`
+				CEP=`echo $CEP | cut -c-$CUT`
+
+				FIXO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f10 | cut -c2-`"
+				CARAC=`echo $FIXO | wc -c`
+				CUT=`expr $CARAC - 1`
+				FIXO=`echo $FIXO | cut -c-$CUT`
+
+				CELULAR="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f11 | cut -c2-`"
+				CARAC=`echo $CELULAR | wc -c`
+				CUT=`expr $CARAC - 1`
+				CELULAR=`echo $CELULAR | cut -c-$CUT`
+
+				FAX="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f12 | cut -c2-`"
+				CARAC=`echo $FAX | wc -c`
+				CUT=`expr $CARAC - 1`
+				FAX=`echo $FAX | cut -c-$CUT`
+
+				EMAIL="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f13 | cut -c2-`"
+				CARAC=`echo $EMAIL | wc -c`
+				CUT=`expr $CARAC - 1`
+				EMAIL=`echo $EMAIL | cut -c-$CUT`
+		
+				OBS="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f14 | cut -c2-`"
+				CARAC=`echo $OBS | wc -c`
+				CUT=`expr $CARAC - 1`
+				OBS=`echo $OBS | cut -c-$CUT`
+		
+				CARAC=`echo $CPF | wc -c`
+				if [[ $CARAC = "12" ]]; then
+					APELIDOOUFANTASIA="Apelido"
+					NOMEOUEMPRESA="Nome"
+					CPFOUCNPJ="CPF"
+				elif [[ $CARAC = "15" ]]; then
+					APELIDOOUFANTASIA="Razão Social"
+					NOMEOUEMPRESA="Empresa"
+					CPFOUCNPJ="CNPJ"
+				fi
+		
+				dialog --backtitle "$BACKTITLE" --msgbox "Informações do Cadastro:\n\nCódigo de Cadastro: `echo $CODIGO`\nNome: `echo $NOME`\nRG: `echo $RG`\nCPF: `echo $CPF`\nEndereço: `echo $ENDERECO`\nBairro: `echo $BAIRRO`\nCidade: `echo $CIDADE`\nEstado: `echo $ESTADO`\nCEP: `echo $CEP`\nTelefone Fixo: `echo $FIXO`\nTelefone Celular: `echo $CELULAR`\nFax: `echo $FAX`\nE-mail: `echo $EMAIL`\nOBS.: `echo $OBS`" 0 0 --and-widget --defaultno --yesno 'Alterar cadastro?' 0 0
+		 		if [[ "$?" = "0" ]]; then
+					altera_dados
+				else
+					dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+				fi
+			fi
+		fi
+
+		menu_fisico
+	}
+	#
+	#Final do código de alteração de cadastro
+	#
+
+	#
+	#Inicio do código de pesquisa de cadastro
+	#
+	pesquisa_fisico ()
+	{
+		MODULO="Pesquisar Cadastro Físico"
+		rm -f $TEMP
+		CASE=`dialog --backtitle "$BACKTITLE" --stdout --menu \
+	"Selecione por qual campo fazer a busca." 0 0 0 \
+	"NOME" "Fazer busca pelo nome ou razão social" \
+	"RG" "Fazer busca pelo RG" \
+	"CPF" "Fazer busca pelo CPF" \
+	"CIDADE" "Buscar por todos os cadastros de uma cidade" \
+	"FIXO" "Fazer busca pelo telefone fixo" \
+	"CELULAR" "Fazer busca pelo telefone Celular" \
+	"SAIR" "Vai para o Menu CadShell Físico"`
+		if [[ "$?" = "0" ]]; then	
+			case $CASE in
+			NOME) CAMPO=nome; PESQUISA="o Nome" ;;
+			RG) CAMPO=rg; PESQUISA="o RG" ;;
+			CPF) CAMPO=cpf; PESQUISA="o CPF/CNPJ" ;;
+			CIDADE) CAMPO=cidade; PESQUISA="a Cidade" ;;
+			FIXO) CAMPO=fixo; PESQUISA="o Telefone Fixo" ;;
+			CELULAR) CAMPO=celular; PESQUISA="o Telefone Celular" ;;
+			SAIR) menu_fisico ;;
+			esac
+
+			FILTRA="`dialog --backtitle "$BACKTITLE" --stdout --inputbox "Digite $PESQUISA para pesquisar:" 0 0`"
+			if [[ $? = "0" ]]; then
+				FILTRA="`echo $FILTRA | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+				BUSCA="'%$FILTRA%'"
+				SELECT="SELECT * FROM $TABELA WHERE $CAMPO LIKE $BUSCA"
+				
+				rm -f $TEMP
+				for i in `$SQL "$SELECT" | grep -i "$FILTRA" | cut -c-7 | sort -n`; do
+					SELECT="SELECT * FROM $TABELA WHERE codigo= '$i'"
+					CODIGO="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f1`"
+					NOME="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f2`"
+					RG="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f3`"
+					CPF="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f4`"
+					ENDERECO="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f5`"
+					BAIRRO="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f6`"
+					CIDADE="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f7`"
+					ESTADO="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f8`"
+					CEP="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f9`"
+					FIXO="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f10`"
+					CELULAR="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f11`"
+					FAX="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f12`"
+					EMAIL="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f13`"
+					OBS="`$SQL "$SELECT" | grep -w $i | grep -vi "registro" | grep -vi "linha" | cut -d"|" -f14`"
+					
+					cat <<-EOF >> $TEMP
+					Código de Cadastro: `echo $CODIGO`
+					Nome: `echo $NOME`
+					RG: `echo $RG`
+					CPF: `echo $CPF`
+					Endereço: `echo $ENDERECO`
+					Bairro: `echo $BAIRRO`
+					Cidade: `echo $CIDADE`
+					Estado: `echo $ESTADO`
+					CEP: `echo $CEP`
+					Telefone Fixo: `echo $FIXO`
+					Telefone Celular: `echo $CELULAR`
+					Telefone Fax: `echo $FAX`
+					E-mail: `echo $EMAIL`
+					OBS.: `echo $OBS`
+					--------------------------------------------------
+					EOF
+				done
+				
+				if [[ -f $TEMP ]]; then
+					dialog --backtitle "$BACKTITLE" --textbox $TEMP 0 0 --and-widget --defaultno --yesno 'Imprimir?' 0 0
+					if [[ $? = "0" ]]; then
+						dialog --backtitle "$BACKTITLE" --infobox "Imprimindo..." 3 32 && sleep 2
+						cat $TEMP | pr -o 8 | lpr
+					fi
+				else
+					dialog --backtitle "$BACKTITLE" --msgbox "Nenhum cadastro encontrado." 5 32
+				fi
+			fi
+		fi
+		menu_fisico
+	}
+	#
+	#Final do código de pesquisa de cadastro
+	#
+
+	#
+	#Inicio do código de exclusão de cadastro
+	#
+	exclui_fisico ()
+	{
+		MODULO="Excluir cadastro Físico"
+		rm -f $TEMP
+		FILTRA="`dialog --backtitle "$BACKTITLE" --stdout --inputbox "Digite um nome para excluir:" 0 0`"
+		if [[ $? = "0" ]]; then
+			FILTRA="`echo $FILTRA | sed y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/ | sed y/àáâãäåèéêëìíîïòóôõöùúûüçñ/ÀÁÂÃÄÅÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÇÑ/`"
+			BUSCA="'%$FILTRA%'"
+			SELECT="SELECT * FROM $TABELA WHERE nome LIKE $BUSCA"
+			$SQL "$SELECT" | grep "$FILTRA" | cut -c-7 > $TEMP
+			NUM=`cat $TEMP | wc -l`
+		
+			if [[ $NUM -ge "2" ]]; then
+				rm -f $RUN
+				echo > $RUN
+				echo "EXCLUI=\"\`dialog --backtitle '$BACKTITLE' --stdout --radiolist 'Selecione um cadastro para excluir.' 0 0 0 \\" >> $RUN
+				for i in `$SQL "$SELECT" | grep -i "$FILTRA" | cut -c-7 | sort -n`; do
+					SELECT2="SELECT * FROM $TABELA WHERE codigo= '$i'"
+					NOME="`$SQL "$SELECT2" | grep -w $i | grep -vi 'Registro' | cut -d"|" -f2`"
+					echo "$i '`echo $NOME`' off \\" >> $RUN
+				done
+				echo "\`\"" >> $RUN
+				. $RUN
+				if [[ $? != "0" ]]; then
+					menu_fisico
+				fi
+				SELECT="SELECT * FROM $TABELA WHERE codigo= '$EXCLUI'"
+				NOME=`$SQL "$SELECT" | grep -w $EXCLUI | cut -d"|" -f2 | cut -c2-`
+				CARAC=`echo $NOME | wc -c`
+				CUT=`expr $CARAC - 1`
+				NOME=`echo $NOME | cut -c-$CUT`
+				SELECT="SELECT * FROM $TABELA WHERE nome= '$NOME'"
+		
+				CODIGO="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f1`"
+				NOME="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f2`"
+				RG="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f3`"
+				CPF="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f4`"
+				ENDERECO="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f5`"
+				BAIRRO="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f6`"
+				CIDADE="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f7`"
+				ESTADO="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f8`"
+				CEP="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f9`"
+				FIXO="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f10`"
+				CELULAR="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f11`"
+				FAX="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f12`"
+				EMAIL="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f13`"
+				OBS="`$SQL "$SELECT" | grep -w "$NOME" | cut -d"|" -f14`"
+				
+				dialog --backtitle "$BACKTITLE" --msgbox "Informações do Cadastro:\n\nCódigo de Cadastro: `echo $CODIGO`\nNome: `echo $NOME`\nRG: `echo $RG`\nCPF: `echo $CPF`\nEndereço: `echo $ENDERECO`\nBairro: `echo $BAIRRO`\nCidade: `echo $CIDADE`\nEstado: `echo $ESTADO`\nCEP: `echo $CEP`\nTelefone Fixo: `echo $FIXO`\nTelefone Celular: `echo $CELULAR`\nTelefone Fax: `echo $FAX`\nE-mail: `echo $EMAIL`\nOBS: `echo $OBS`" 0 0 --and-widget --defaultno --yesno 'Excluir cadastro?' 0 0
+		 		if [[ "$?" = "0" ]]; then
+					DELETE="DELETE FROM $TABELA WHERE codigo= '$CODIGO'"	
+					$SQL "$DELETE" && dialog --backtitle "$BACKTITLE" --msgbox "Cadastro excluído\ncom sucesso!" 0 0 || dialog --backtitle "$BACKTITLE" --msgbox "ERRO ao excluir cadastro\nTente novamente." 0 0
+				else
+					dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+				fi
+			else
+				CODIGO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f1`"
+				NOME="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f2`"
+				RG="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f3`"
+				CPF="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f4`"
+				ENDERECO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f5`"
+				BAIRRO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f6`"
+				CIDADE="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f7`"
+				ESTADO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f8`"
+				CEP="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f9`"
+				FIXO="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f10`"
+				CELULAR="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f11`"
+				FAX="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f12`"
+				EMAIL="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f13`"
+				OBS="`$SQL "$SELECT" | grep "$FILTRA" | cut -d"|" -f14`"
+		
+				dialog --backtitle "$BACKTITLE" --msgbox "Informações do Cadastro:\n\nCódigo de Cadastro: `echo $CODIGO`\nNome: `echo $NOME`\nRG: `echo $RG`\nCPF: `echo $CPF`\nEndereço: `echo $ENDERECO`\nBairro: `echo $BAIRRO`\nCidade: `echo $CIDADE`\nEstado: `echo $ESTADO`\nCEP: `echo $CEP`\nTelefone Fixo: `echo $FIXO`\nTelefone Celular: `echo $CELULAR`\nTelefone Fax: `echo $FAX`\nE-mail: `echo $EMAIL`\nOBS: `echo $OBS`" 0 0 --and-widget --defaultno --yesno 'Excluir cadastro?' 0 0
+		 		if [[ "$?" = "0" ]]; then
+					DELETE="DELETE FROM $TABELA WHERE codigo= '$CODIGO'"	
+					$SQL "$DELETE" && dialog --backtitle "$BACKTITLE" --msgbox "Cadastro excluído com sucesso!" 0 0 || dialog --backtitle "$BACKTITLE" --msgbox "ERRO ao excluir cadastro\nTente novamente." 0 0
+				else
+					dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+				fi
+			fi
+		fi
+		menu_fisico
+	}
+	#
+	#Final do código de exclusão de cadastro
+	#
+
+	#
+	#Inicio do código do menu principal do CadShell Físico
+	#
+	menu_fisico ()
+	{
+		MODULO="Menu CadShell Físico"
+		
+		OPCAO=`dialog --backtitle "$BACKTITLE" --stdout --nocancel --menu \
+	"Selecione a opção desejada abaixo." 0 0 0 \
+	"ADICIONAR" "Adiciona cadastro" \
+	"ALTERAR" "Altera cadastro" \
+	"PESQUISAR" "Pesquisar cadastro" \
+	"EXCLUIR" "Exclui cadastro" \
+	"SAIR" "Vai para o menu principal"`
+
+		if [[ $? = 0 ]]; then
+			case $OPCAO in
+				"ADICIONAR") adiciona_fisico ;;
+				"ALTERAR") altera_fisico ;;
+				"PESQUISAR") pesquisa_fisico ;;
+				"EXCLUIR") exclui_fisico ;;
+				"SAIR") menu_cadshell ;;
+			esac
+		fi
+		rm -f $TEMP $RUN
+	}
+	#
+	#Final do código do menu principal do CadShell Físico
+	#
+	
+	menu_fisico
+}
+#
+#Final do código do CadShell Físico
+#

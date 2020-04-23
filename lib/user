@@ -1,0 +1,66 @@
+usuario ()
+{	
+	TABELA="`cat ~/.cadshell/tabela_fisico`"
+	SEQUENCIA="sequencia_fisico"
+	
+	#
+	#Inicio do código de inclusão de usuário
+	#
+	adiciona_usuario ()
+	{
+		MODULO="Adiciona Usuário"
+	
+		ADDUSUARIO="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Nome de Usuário:" 0 0`"
+		if [[ $? = "0" ]]; then
+			ADDSENHA="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --passwordbox "Senha:" 0 0`"
+			dialog --backtitle "$BACKTITLE" --defaultno --yesno "Adinionar usuário $ADDUSUARIO?" 0 0
+			if [[ $? = "0" ]]; then
+				$SQL "CREATE USER $ADDUSUARIO WITH PASSWORD '$ADDSENHA'" && $SQL "GRANT INSERT, UPDATE, DELETE, SELECT ON TABLE $TABELA TO $ADDUSUARIO" && $SQL "GRANT USAGE, UPDATE, SELECT ON SEQUENCE $SEQUENCIA TO $ADDUSUARIO" && dialog --backtitle "$BACKTITLE" --msgbox "Usuário adicionado\ncom sucesso!" 0 0 || dialog --backtitle "$BACKTITLE" --msgbox "ERRO ao adicionar usuário\nTente novamente." 0 0
+			else
+				dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+			fi
+		else
+			dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+		fi
+		usuario
+	}
+	#
+	#Final do código de inclusão de usuário
+	#
+
+	#
+	#Inicio do código de alteração de senha do usuário
+	#
+	altera_senha ()
+	{
+		MODULO="Alterar senha de usuário"
+	
+		ADDUSUARIO="`dialog --backtitle "$BACKTITLE" --stdout --max-input 20 --inputbox "Nome de Usuário:" 0 0`"
+		if [[ $? = "0" ]]; then
+			dialog --backtitle "$BACKTITLE" --defaultno --yesno "Alterar senha do usuário $ADDUSUARIO?" 0 0
+			if [[ $? = "0" ]]; then
+				$SQL "\password $ADDUSUARIO" && dialog --backtitle "$BACKTITLE" --msgbox "Senha alterada com sucesso!" 0 0 || dialog --backtitle "$BACKTITLE" --msgbox "ERRO ao alterar senha\nTente novamente." 0 0
+			else
+				dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+			fi
+		else
+			dialog --backtitle "$BACKTITLE" --msgbox "Cancelado!" 0 0
+		fi
+		usuario
+	}
+	#
+	#Final do código de alteração de senha do usuário
+	#
+
+	MODULO="Configuração de usuário"
+	OPCAO=`dialog --backtitle "$BACKTITLE" --stdout --nocancel --menu "Selecione a opção desejada abaixo." 0 0 0 "ADICIONAR" "Adiciona usuário do sistema" "ALTERAR" "Altera senha de usuário existente" "SAIR" "Vai para o menu principal"`
+	if [[ $? = 0 ]]; then
+		case $OPCAO in
+			"ADICIONAR") adiciona_usuario ;;
+			"ALTERAR") altera_senha ;;
+			"SAIR") menu_cadshell ;;
+		esac
+	else
+		menu_cadshell
+	fi
+}
